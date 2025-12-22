@@ -264,9 +264,15 @@ fetch('/api/humorize', {
   "success": true,
   "originalText": "I love my job",
   "humorousText": "Ah yes, 'I love my job' - The eternal battle cry of someone who's about to learn a valuable life lesson the hard way.",
+  "imageUrl": "https://example.blob.core.windows.net/images/abc123.png",
   "timestamp": "2025-12-22T12:00:00.000Z"
 }
 ```
+
+**Note**: `imageUrl` field contains:
+- **AI Mode**: DALL-E generated image URL (Azure OpenAI)
+- **Mock Mode**: Placeholder image URL
+- The image visually represents the humorous text
 
 **Response** (Error - No Text):
 ```json
@@ -290,10 +296,12 @@ fetch('/api/humorize', {
 - `500`: Server Error - Failed to generate humor
 
 **Features**:
-- **AI-Powered**: Uses Azure OpenAI (GPT-3.5/4) when configured
-- **Fallback Mode**: Uses pre-written humorous templates if AI is unavailable
+- **AI-Powered Text**: Uses Azure OpenAI (GPT-3.5/4) for humor generation
+- **AI-Generated Images**: Uses DALL-E 3 for visual illustrations
+- **Fallback Mode**: Uses pre-written templates and placeholder images if AI is unavailable
 - **Character Limit**: 1000 characters max (1-2 paragraphs)
 - **Response Length**: 3-5 sentences
+- **Image Size**: 1024x1024 pixels, colorful cartoon style
 - **Tone**: Light, friendly, ironic - no offensive content
 - **CORS**: Enabled for all origins
 
@@ -302,9 +310,11 @@ fetch('/api/humorize', {
 Set these environment variables in Azure Static Web Apps settings:
 - `AZURE_OPENAI_ENDPOINT`: Your Azure OpenAI endpoint URL
 - `AZURE_OPENAI_KEY`: Your Azure OpenAI API key
-- `AZURE_OPENAI_DEPLOYMENT`: Deployment name (default: "gpt-35-turbo")
+- `AZURE_OPENAI_DEPLOYMENT`: Text generation deployment (default: "gpt-35-turbo")
 
-If not configured, the endpoint will use mock humorous responses.
+**Note**: DALL-E 3 deployment must be available at the same endpoint for image generation.
+
+If not configured, the endpoint will use mock humorous responses and placeholder images.
 
 **System Prompt** (AI Mode):
 ```

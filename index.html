@@ -291,6 +291,30 @@
             color: #333;
             font-size: 1.05rem;
             line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .humor-response .response-image {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .humor-response .response-image img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .humor-response .response-image img:hover {
+            transform: scale(1.02);
+        }
+
+        .humor-response .image-label {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
         }
 
         .humor-loading {
@@ -389,7 +413,7 @@
 
             <div class="humor-loading" id="humorLoading">
                 <div class="spinner"></div>
-                <p>AI is cooking up something funny...</p>
+                <p>AI is cooking up something funny and creating an illustration...</p>
             </div>
 
             <div class="humor-error" id="humorError"></div>
@@ -397,6 +421,10 @@
             <div class="humor-response" id="humorResponse">
                 <div class="response-label">AI Says:</div>
                 <div class="response-text" id="responseText"></div>
+                <div class="response-image" id="responseImage" style="display: none;">
+                    <img id="generatedImage" src="" alt="AI Generated Illustration">
+                    <div class="image-label">AI-generated illustration</div>
+                </div>
             </div>
         </div>
     </div>
@@ -655,8 +683,21 @@
                 const data = await result.json();
 
                 if (data.success && data.humorousText) {
-                    // Show response
+                    // Show response text
                     document.getElementById('responseText').textContent = data.humorousText;
+                    
+                    // Show image if available
+                    const imageContainer = document.getElementById('responseImage');
+                    const imageElement = document.getElementById('generatedImage');
+                    
+                    if (data.imageUrl) {
+                        imageElement.src = data.imageUrl;
+                        imageElement.alt = 'AI-generated illustration for: ' + data.humorousText.substring(0, 50);
+                        imageContainer.style.display = 'block';
+                    } else {
+                        imageContainer.style.display = 'none';
+                    }
+                    
                     response.classList.add('visible');
                     regenerateBtn.style.display = 'inline-block';
 
@@ -664,6 +705,9 @@
                     trackUETEvent('humor_generated', 'engagement', 'AI Humor Generator', 1);
                     
                     console.log('😂 Humor generated:', data.humorousText);
+                    if (data.imageUrl) {
+                        console.log('🖼️ Image generated:', data.imageUrl);
+                    }
                 } else {
                     throw new Error(data.error || 'Failed to generate humor');
                 }
