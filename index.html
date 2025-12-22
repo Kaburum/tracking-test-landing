@@ -359,11 +359,6 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Welcome to Your Landing Page</h1>
-        <p>This is a simple landing page designed for testing JavaScript tracking implementations.</p>
-        
-        <button class="cta-button" id="ctaButton">Get Started</button>
-
         <!-- AI Humor Section -->
         <div class="humor-section">
             <h2>😂 AI Humor Generator</h2>
@@ -399,21 +394,6 @@
                     <img id="generatedImage" src="" alt="AI Generated Illustration">
                     <div class="image-label">AI-generated illustration</div>
                 </div>
-            </div>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <h3>📊 Track Events</h3>
-                <p>Test your event tracking implementation with button clicks and interactions.</p>
-            </div>
-            <div class="feature">
-                <h3>🎯 Page Views</h3>
-                <p>Monitor page view tracking and navigation patterns.</p>
-            </div>
-            <div class="feature">
-                <h3>⚡ Fast & Simple</h3>
-                <p>Lightweight HTML page that loads quickly and works everywhere.</p>
             </div>
         </div>
 
@@ -616,17 +596,6 @@
                     statusEl.style.background = 'rgba(255, 165, 0, 0.8)';
                 }
             }
-        });
-        
-        // Add click tracking to CTA button
-        document.getElementById('ctaButton').addEventListener('click', async function() {
-            // Track to backend API
-            await trackButtonClick('Get Started');
-            
-            // Track custom UET event
-            trackUETEvent('button_click', 'engagement', 'Get Started Button', 1);
-            
-            alert('Button clicked! Check console and UET Events section below for tracking data.');
         });
 
         // Initialize UET status on load
