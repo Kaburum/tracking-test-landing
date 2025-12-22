@@ -5,54 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracking Test Landing Page</title>
     
-    <!-- Bing UET (Universal Event Tracking) - With Consent Management -->
+    <!-- Bing UET (Universal Event Tracking) - Loads Before Consent -->
     <script>
         // Initialize UET queue
         window.uetq = window.uetq || [];
         
-        // Check if consent has been granted
-        function hasConsent() {
-            return localStorage.getItem('cookieConsent') === 'granted';
-        }
-        
-        // Load UET script
-        function loadUET() {
-            if (window.UET) return; // Already loaded
-            
-            (function(w,d,t,r,u){
-                var f,n,i;
-                f=function(){
-                    var o={ti:"97220626", enableAutoSpaTracking: true};
-                    o.q=w[u];
-                    w[u]=new UET(o);
-                    
-                    // Set consent state
-                    if (hasConsent()) {
-                        w[u].push('consent', 'grant');
-                    }
-                    
-                    // Fire pageLoad event
-                    w[u].push("pageLoad");
-                };
-                n=d.createElement(t);
-                n.src=r;
-                n.async=1;
-                n.onload=n.onreadystatechange=function(){
-                    var s=this.readyState;
-                    if(!s||s==="loaded"||s==="complete"){
-                        f();
-                        n.onload=n.onreadystatechange=null;
-                    }
-                };
-                i=d.getElementsByTagName(t)[0];
-                i.parentNode.insertBefore(n,i);
-            })(window,document,"script","//bat.bing.com/bat.js","uetq");
-        }
-        
-        // Load UET on page load (will check consent internally)
-        if (hasConsent()) {
-            loadUET();
-        }
+        // Load UET script immediately (before consent)
+        (function(w,d,t,r,u){
+            var f,n,i;
+            f=function(){
+                var o={ti:"97220626", enableAutoSpaTracking: true};
+                o.q=w[u];
+                w[u]=new UET(o);
+                
+                // Fire pageLoad event immediately
+                w[u].push("pageLoad");
+            };
+            n=d.createElement(t);
+            n.src=r;
+            n.async=1;
+            n.onload=n.onreadystatechange=function(){
+                var s=this.readyState;
+                if(!s||s==="loaded"||s==="complete"){
+                    f();
+                    n.onload=n.onreadystatechange=null;
+                }
+            };
+            i=d.getElementsByTagName(t)[0];
+            i.parentNode.insertBefore(n,i);
+        })(window,document,"script","//bat.bing.com/bat.js","uetq");
     </script>
     
     <style>
@@ -594,29 +575,30 @@
             localStorage.setItem('cookieConsent', 'granted');
             document.getElementById('cookieBanner').classList.remove('visible');
             
-            // Load UET and grant consent
-            loadUET();
-            
-            // Update UET consent if already loaded
-            if (window.uetq && window.UET) {
-                window.uetq.push('consent', 'grant');
+            // Send consent update to UET
+            if (window.uetq) {
+                window.uetq.push('consent', 'update', {
+                    'ad_storage': 'granted'
+                });
                 addUETEvent('Consent Granted', { timestamp: new Date().toISOString() });
             }
             
-            console.log('✅ Cookie consent granted - UET tracking enabled');
+            console.log('✅ Cookie consent granted - UET ad_storage set to granted');
         }
         
         function declineCookies() {
             localStorage.setItem('cookieConsent', 'denied');
             document.getElementById('cookieBanner').classList.remove('visible');
             
-            // Update UET consent to deny
+            // Send consent update to UET
             if (window.uetq) {
-                window.uetq.push('consent', 'deny');
+                window.uetq.push('consent', 'update', {
+                    'ad_storage': 'denied'
+                });
                 addUETEvent('Consent Denied', { timestamp: new Date().toISOString() });
             }
             
-            console.log('⛔ Cookie consent declined - UET tracking disabled');
+            console.log('⛔ Cookie consent declined - UET ad_storage set to denied');
         }
         
         // Show cookie banner on page load if consent not given
@@ -625,8 +607,19 @@
             if (!consent) {
                 document.getElementById('cookieBanner').classList.add('visible');
             } else if (consent === 'granted') {
-                // Consent already granted, ensure UET is loaded
-                loadUET();
+                // Consent already granted, send update to UET
+                if (window.uetq) {
+                    window.uetq.push('consent', 'update', {
+                        'ad_storage': 'granted'
+                    });
+                }
+            } else if (consent === 'denied') {
+                // Consent was denied, send update to UET
+                if (window.uetq) {
+                    window.uetq.push('consent', 'update', {
+                        'ad_storage': 'denied'
+                    });
+                }
             }
         });
 
