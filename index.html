@@ -5,8 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracking Test Landing Page</title>
     
-    <!-- Bing UET (Universal Event Tracking) -->
-    <script>(function(w,d,t,r,u){var f,n,i;w[u]=w[u]||[],f=function(){var o={ti:"97220626", enableAutoSpaTracking: true};o.q=w[u],w[u]=new UET(o),w[u].push("pageLoad")},n=d.createElement(t),n.src=r,n.async=1,n.onload=n.onreadystatechange=function(){var s=this.readyState;s&&s!=="loaded"&&s!=="complete"||(f(),n.onload=n.onreadystatechange=null)},i=d.getElementsByTagName(t)[0],i.parentNode.insertBefore(n,i)})(window,document,"script","//bat.bing.com/bat.js","uetq");</script>
+    <!-- Bing UET (Universal Event Tracking) - With Consent Management -->
+    <script>
+        // Initialize UET queue
+        window.uetq = window.uetq || [];
+        
+        // Check if consent has been granted
+        function hasConsent() {
+            return localStorage.getItem('cookieConsent') === 'granted';
+        }
+        
+        // Load UET script
+        function loadUET() {
+            if (window.UET) return; // Already loaded
+            
+            (function(w,d,t,r,u){
+                var f,n,i;
+                f=function(){
+                    var o={ti:"97220626", enableAutoSpaTracking: true};
+                    o.q=w[u];
+                    w[u]=new UET(o);
+                    
+                    // Set consent state
+                    if (hasConsent()) {
+                        w[u].push('consent', 'grant');
+                    }
+                    
+                    // Fire pageLoad event
+                    w[u].push("pageLoad");
+                };
+                n=d.createElement(t);
+                n.src=r;
+                n.async=1;
+                n.onload=n.onreadystatechange=function(){
+                    var s=this.readyState;
+                    if(!s||s==="loaded"||s==="complete"){
+                        f();
+                        n.onload=n.onreadystatechange=null;
+                    }
+                };
+                i=d.getElementsByTagName(t)[0];
+                i.parentNode.insertBefore(n,i);
+            })(window,document,"script","//bat.bing.com/bat.js","uetq");
+        }
+        
+        // Load UET on page load (will check consent internally)
+        if (hasConsent()) {
+            loadUET();
+        }
+    </script>
     
     <style>
         * {
@@ -355,6 +402,117 @@
         .humor-error.visible {
             display: block;
         }
+
+        /* Cookie Consent Banner */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(51, 51, 51, 0.98);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .cookie-banner.visible {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .cookie-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .cookie-text h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .cookie-text p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #ddd;
+            line-height: 1.5;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .cookie-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cookie-btn.accept {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .cookie-btn.accept:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .cookie-btn.decline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .cookie-btn.decline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .cookie-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .cookie-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .cookie-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -415,8 +573,63 @@
         Tracking Active ✓
     </div>
 
+    <!-- Cookie Consent Banner -->
+    <div class="cookie-banner" id="cookieBanner">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <h3>🍪 We Value Your Privacy</h3>
+                <p>We use cookies and tracking technologies (including Bing UET) to improve your experience, analyze site traffic, and personalize content. By clicking "Accept All", you consent to our use of cookies and tracking.</p>
+            </div>
+            <div class="cookie-buttons">
+                <button class="cookie-btn accept" onclick="acceptCookies()">Accept All</button>
+                <button class="cookie-btn decline" onclick="declineCookies()">Decline</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tracking API Integration -->
     <script>
+        // Cookie Consent Management
+        function acceptCookies() {
+            localStorage.setItem('cookieConsent', 'granted');
+            document.getElementById('cookieBanner').classList.remove('visible');
+            
+            // Load UET and grant consent
+            loadUET();
+            
+            // Update UET consent if already loaded
+            if (window.uetq && window.UET) {
+                window.uetq.push('consent', 'grant');
+                addUETEvent('Consent Granted', { timestamp: new Date().toISOString() });
+            }
+            
+            console.log('✅ Cookie consent granted - UET tracking enabled');
+        }
+        
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'denied');
+            document.getElementById('cookieBanner').classList.remove('visible');
+            
+            // Update UET consent to deny
+            if (window.uetq) {
+                window.uetq.push('consent', 'deny');
+                addUETEvent('Consent Denied', { timestamp: new Date().toISOString() });
+            }
+            
+            console.log('⛔ Cookie consent declined - UET tracking disabled');
+        }
+        
+        // Show cookie banner on page load if consent not given
+        window.addEventListener('DOMContentLoaded', function() {
+            const consent = localStorage.getItem('cookieConsent');
+            if (!consent) {
+                document.getElementById('cookieBanner').classList.add('visible');
+            } else if (consent === 'granted') {
+                // Consent already granted, ensure UET is loaded
+                loadUET();
+            }
+        });
+
         // UET Events Tracking
         const uetEvents = [];
         let uetInitialized = false;
