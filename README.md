@@ -1,6 +1,6 @@
 # Tracking Test Landing Page
 
-A simple HTML landing page with backend API designed for testing JavaScript tracking implementations and AI-powered text humor generation.
+A simple HTML landing page with backend API designed for testing JavaScript tracking implementations and AI-powered text humor generation with Azure OpenAI.
 
 ## Features
 
