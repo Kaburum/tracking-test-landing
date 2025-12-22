@@ -112,6 +112,79 @@
         .tracking-status.active {
             display: block;
         }
+
+        /* UET Events Display Section */
+        .uet-events-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f0f4ff;
+            border-radius: 15px;
+            border: 2px solid #667eea;
+        }
+
+        .uet-events-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .uet-status {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .uet-status.loading {
+            border-left-color: #FF9800;
+        }
+
+        .uet-status.error {
+            border-left-color: #F44336;
+        }
+
+        .events-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .event-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            font-size: 0.9rem;
+        }
+
+        .event-item .event-type {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .event-item .event-time {
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        .event-item .event-data {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .no-events {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -135,6 +208,17 @@
                 <p>Lightweight HTML page that loads quickly and works everywhere.</p>
             </div>
         </div>
+
+        <!-- UET Events Display Section -->
+        <div class="uet-events-section">
+            <h2>🔵 Bing UET Tracking Events</h2>
+            <div class="uet-status" id="uetStatus">
+                <strong>Status:</strong> <span id="uetStatusText">Initializing...</span>
+            </div>
+            <div class="events-container" id="eventsContainer">
+                <div class="no-events">No UET events captured yet. Events will appear here as they are tracked.</div>
+            </div>
+        </div>
     </div>
 
     <div class="tracking-status" id="trackingStatus">
@@ -143,6 +227,96 @@
 
     <!-- Tracking API Integration -->
     <script>
+        // UET Events Tracking
+        const uetEvents = [];
+        let uetInitialized = false;
+
+        // Override window.uetq to intercept UET events
+        const originalUetq = window.uetq || [];
+        window.uetq = new Proxy(originalUetq, {
+            get(target, prop) {
+                return target[prop];
+            },
+            set(target, prop, value) {
+                target[prop] = value;
+                return true;
+            }
+        });
+
+        // Monitor UET initialization
+        const checkUETInit = setInterval(() => {
+            if (window.UET && typeof window.UET === 'function') {
+                if (!uetInitialized) {
+                    uetInitialized = true;
+                    addUETEvent('UET Initialized', { timestamp: new Date().toISOString() });
+                    updateUETStatus('Ready ✓', false);
+                    clearInterval(checkUETInit);
+                }
+            }
+        }, 100);
+
+        // Add UET event to display
+        function addUETEvent(eventType, data = {}) {
+            const event = {
+                type: eventType,
+                data: data,
+                timestamp: new Date().toISOString()
+            };
+            uetEvents.push(event);
+            displayUETEvents();
+            console.log('🔵 UET Event:', eventType, data);
+        }
+
+        // Display UET events in the UI
+        function displayUETEvents() {
+            const container = document.getElementById('eventsContainer');
+            if (!container) return;
+
+            if (uetEvents.length === 0) {
+                container.innerHTML = '<div class="no-events">No UET events captured yet. Events will appear here as they are tracked.</div>';
+                return;
+            }
+
+            container.innerHTML = uetEvents.map((event, index) => `
+                <div class="event-item">
+                    <div class="event-type">${event.type}</div>
+                    <div class="event-time">${new Date(event.timestamp).toLocaleString()}</div>
+                    <div class="event-data">${JSON.stringify(event.data, null, 2)}</div>
+                </div>
+            `).reverse().join('');
+        }
+
+        // Update UET status indicator
+        function updateUETStatus(text, isLoading = false) {
+            const statusEl = document.getElementById('uetStatus');
+            const statusText = document.getElementById('uetStatusText');
+            if (statusText) {
+                statusText.textContent = text;
+            }
+            if (statusEl) {
+                statusEl.className = 'uet-status';
+                if (isLoading) statusEl.classList.add('loading');
+            }
+        }
+
+        // Track custom UET event
+        function trackUETEvent(eventAction, eventCategory, eventLabel, eventValue) {
+            if (window.uetq && typeof window.uetq.push === 'function') {
+                window.uetq.push('event', eventAction, {
+                    'event_category': eventCategory,
+                    'event_label': eventLabel,
+                    'event_value': eventValue
+                });
+                addUETEvent(`Custom Event: ${eventAction}`, {
+                    category: eventCategory,
+                    label: eventLabel,
+                    value: eventValue
+                });
+            } else {
+                console.warn('UET not available yet');
+            }
+        }
+
         // API Configuration
         const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:7071/api'  // Local development
@@ -238,9 +412,25 @@
         
         // Add click tracking to CTA button
         document.getElementById('ctaButton').addEventListener('click', async function() {
+            // Track to backend API
             await trackButtonClick('Get Started');
-            alert('Button clicked! Check console for tracking events and API responses.');
+            
+            // Track custom UET event
+            trackUETEvent('button_click', 'engagement', 'Get Started Button', 1);
+            
+            alert('Button clicked! Check console and UET Events section below for tracking data.');
         });
+
+        // Initialize UET status on load
+        updateUETStatus('Waiting for UET to load...', true);
+        
+        // Timeout for UET initialization
+        setTimeout(() => {
+            if (!uetInitialized) {
+                updateUETStatus('UET not detected ⚠️', false);
+                document.getElementById('uetStatus').classList.add('error');
+            }
+        }, 5000);
     </script>
 </body>
 </html>
