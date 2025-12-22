@@ -82,7 +82,12 @@ module.exports = async function (context, req) {
                 imageUrl = await generateImageWithAI(humorousText, context);
                 context.log('Image generated with AI');
             } catch (error) {
-                context.log('AI generation failed, using fallback:', error.message);
+                context.log('❌ AI generation failed, using fallback');
+                context.log('Error details:', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack
+                });
                 humorousText = generateMockHumor(userText);
                 imageUrl = generatePlaceholderImage(humorousText);
                 usedAI = false;
