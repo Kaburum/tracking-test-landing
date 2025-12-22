@@ -137,7 +137,7 @@ module.exports = async function (context, req) {
         context.log('Error generating humor:', error);
         
         context.res = {
-            status: 500,
+            status: 200, // Return 200 with error in body instead of 500
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
@@ -145,7 +145,9 @@ module.exports = async function (context, req) {
             body: {
                 success: false,
                 error: 'Failed to generate humor. Please try again.',
-                details: error.message
+                details: error.message,
+                errorType: error.name,
+                timestamp: new Date().toISOString()
             }
         };
     }
