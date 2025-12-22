@@ -1,0 +1,11 @@
+{
+  "name": "tracking-api",
+  "version": "1.0.0",
+  "description": "Backend API for tracking test landing page",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

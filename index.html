@@ -137,40 +137,105 @@
         Tracking Active ✓
     </div>
 
-    <!-- Your tracking script will go here -->
+    <!-- Tracking API Integration -->
     <script>
-        // Placeholder for your tracking code
-        // Example: Initialize your tracking library here
+        // API Configuration
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:7071/api'  // Local development
+            : '/api';  // Production (Azure Static Web Apps)
         
         console.log('Landing page loaded');
+        console.log('API URL:', API_BASE_URL);
         
-        // Track page view (replace with your actual tracking code)
-        function trackPageView() {
-            console.log('Page view tracked');
-            // Your tracking code here
+        // Track event to backend API
+        async function trackEvent(eventType, data = {}) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/track`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        eventType: eventType,
+                        data: {
+                            ...data,
+                            url: window.location.href,
+                            title: document.title,
+                            timestamp: new Date().toISOString()
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ Event tracked successfully:', eventType, result.eventId);
+                } else {
+                    console.error('❌ Failed to track event:', result.error);
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('❌ Error tracking event:', error);
+                return { success: false, error: error.message };
+            }
         }
         
-        // Track button click (replace with your actual tracking code)
-        function trackButtonClick(buttonName) {
-            console.log('Button clicked:', buttonName);
-            // Your tracking code here
+        // Track page view
+        async function trackPageView() {
+            console.log('📊 Tracking page view...');
+            await trackEvent('page_view', {
+                referrer: document.referrer,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height
+            });
+        }
+        
+        // Track button click
+        async function trackButtonClick(buttonName) {
+            console.log('🖱️ Tracking button click:', buttonName);
+            await trackEvent('button_click', {
+                buttonName: buttonName,
+                buttonId: 'ctaButton'
+            });
+        }
+        
+        // Check API health
+        async function checkAPIHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const health = await response.json();
+                console.log('💚 API Status:', health);
+                return health.status === 'healthy';
+            } catch (error) {
+                console.warn('⚠️ API health check failed:', error.message);
+                return false;
+            }
         }
         
         // Initialize tracking on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            trackPageView();
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Check API health
+            const apiHealthy = await checkAPIHealth();
+            
+            // Track page view
+            await trackPageView();
             
             // Show tracking status indicator
             const statusEl = document.getElementById('trackingStatus');
             if (statusEl) {
                 statusEl.classList.add('active');
+                if (!apiHealthy) {
+                    statusEl.textContent = 'Tracking Offline ⚠️';
+                    statusEl.style.background = 'rgba(255, 165, 0, 0.8)';
+                }
             }
         });
         
         // Add click tracking to CTA button
-        document.getElementById('ctaButton').addEventListener('click', function() {
-            trackButtonClick('Get Started');
-            alert('Button clicked! Check console for tracking events.');
+        document.getElementById('ctaButton').addEventListener('click', async function() {
+            await trackButtonClick('Get Started');
+            alert('Button clicked! Check console for tracking events and API responses.');
         });
     </script>
 </body>
