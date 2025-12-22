@@ -221,25 +221,28 @@ async function generateImageWithAI(humorText, context) {
 
 // Generate placeholder image URL (fallback)
 function generatePlaceholderImage(humorText) {
-    // Use multiple reliable placeholder services
-    const colors = ['ff6b6b', 'ffa07a', '98d8c8', 'f7dc6f', 'bb8fce', '85c1e2', 'ff9ff3', 'feca57'];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    // Use multiple fun and engaging placeholder services
+    const seed = encodeURIComponent(humorText.substring(0, 30));
     
-    // Try multiple placeholder services (in order of preference)
-    const services = [
-        // DiceBear - generates fun avatars
-        `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(humorText.substring(0, 20))}&backgroundColor=${randomColor}`,
-        
-        // Placeholder.com - simple colored blocks
-        `https://via.placeholder.com/1024x1024/${randomColor}/ffffff?text=😂+AI+Humor`,
-        
-        // Placehold.co - modern placeholder service
-        `https://placehold.co/1024x1024/${randomColor}/white?text=AI+Generated+Humor`,
-        
-        // UI Avatars - text-based avatars
-        `https://ui-avatars.com/api/?name=AI+Humor&size=1024&background=${randomColor}&color=fff&bold=true&font-size=0.33`
+    // Fun DiceBear avatar styles (more playful than 'shapes')
+    const diceBearStyles = [
+        'bottts',        // Fun robots
+        'avataaars',     // Cartoon people
+        'big-ears',      // Cute characters with big ears
+        'croodles',      // Doodle-style characters
+        'fun-emoji',     // Emoji-based avatars
+        'lorelei',       // Illustrated characters
+        'micah',         // Diverse illustrated people
+        'miniavs',       // Cute mini characters
+        'notionists',    // Notion-style avatars
+        'personas'       // Character personas
     ];
     
-    // Return the first service (most reliable)
-    return services[0];
+    const randomStyle = diceBearStyles[Math.floor(Math.random() * diceBearStyles.length)];
+    
+    const colors = ['b6e3f4', 'c0aede', 'ffd5dc', 'ffdfbf', 'd1f4dd', 'ffeaa7', 'fab1a0', 'a29bfe'];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    // Return fun avatar with random style
+    return `https://api.dicebear.com/7.x/${randomStyle}/svg?seed=${seed}&backgroundColor=${randomColor}&size=1024`;
 }
