@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking Test Landing Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* Tracking status indicator */
+        .tracking-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .tracking-status.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Welcome to Your Landing Page</h1>
+        <p>This is a simple landing page designed for testing JavaScript tracking implementations.</p>
+        
+        <button class="cta-button" id="ctaButton">Get Started</button>
+
+        <div class="features">
+            <div class="feature">
+                <h3>📊 Track Events</h3>
+                <p>Test your event tracking implementation with button clicks and interactions.</p>
+            </div>
+            <div class="feature">
+                <h3>🎯 Page Views</h3>
+                <p>Monitor page view tracking and navigation patterns.</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ Fast & Simple</h3>
+                <p>Lightweight HTML page that loads quickly and works everywhere.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tracking-status" id="trackingStatus">
+        Tracking Active ✓
+    </div>
+
+    <!-- Your tracking script will go here -->
+    <script>
+        // Placeholder for your tracking code
+        // Example: Initialize your tracking library here
+        
+        console.log('Landing page loaded');
+        
+        // Track page view (replace with your actual tracking code)
+        function trackPageView() {
+            console.log('Page view tracked');
+            // Your tracking code here
+        }
+        
+        // Track button click (replace with your actual tracking code)
+        function trackButtonClick(buttonName) {
+            console.log('Button clicked:', buttonName);
+            // Your tracking code here
+        }
+        
+        // Initialize tracking on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            trackPageView();
+            
+            // Show tracking status indicator
+            const statusEl = document.getElementById('trackingStatus');
+            if (statusEl) {
+                statusEl.classList.add('active');
+            }
+        });
+        
+        // Add click tracking to CTA button
+        document.getElementById('ctaButton').addEventListener('click', function() {
+            trackButtonClick('Get Started');
+            alert('Button clicked! Check console for tracking events.');
+        });
+    </script>
+</body>
+</html>
