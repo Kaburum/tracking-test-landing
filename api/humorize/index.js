@@ -69,6 +69,7 @@ module.exports = async function (context, req) {
         let humorousText;
         let imageUrl = null;
         let usedAI = false;
+        let lastError = null;
 
         if (useAI) {
             try {
@@ -93,7 +94,7 @@ module.exports = async function (context, req) {
                 usedAI = false;
                 
                 // Store error for debugging
-                this.lastError = {
+                lastError = {
                     message: error.message,
                     name: error.name
                 };
@@ -121,14 +122,14 @@ module.exports = async function (context, req) {
                 success: true,
                 originalText: userText,
                 humorousText: humorousText,
-                imageUrl: imageUrl,,
-                    lastError: this.lastError || null
+                imageUrl: imageUrl,
                 usedAI: usedAI,
                 timestamp: new Date().toISOString(),
                 debug: {
                     endpoint: process.env.AZURE_OPENAI_ENDPOINT ? 'set' : 'not set',
                     key: process.env.AZURE_OPENAI_KEY ? 'set' : 'not set',
-                    deployment: process.env.AZURE_OPENAI_DEPLOYMENT || 'not set'
+                    deployment: process.env.AZURE_OPENAI_DEPLOYMENT || 'not set',
+                    lastError: lastError
                 }
             }
         };
