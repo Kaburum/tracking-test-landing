@@ -56,19 +56,41 @@ module.exports = async function (context, req) {
         }
 
         // Check for Azure OpenAI configuration
-        const useAI = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_KEY;
+        const hasEndpoint = !!process.env.AZURE_OPENAI_ENDPOINT;
+        const hasKey = !!process.env.AZURE_OPENAI_KEY;
+        const useAI = hasEndpoint && hasKey;
+
+        context.log('=== AI Configuration Status ===');
+        context.log('AZURE_OPENAI_ENDPOINT configured:', hasEndpoint);
+        context.log('AZURE_OPENAI_KEY configured:', hasKey);
+        context.log('Using AI models:', useAI);
+        context.log('==============================');
 
         let humorousText;
         let imageUrl = null;
+        let usedAI = false;
 
         if (useAI) {
-            // Use Azure OpenAI
-            humorousText = await generateHumorWithAI(userText, context);
-            
-            // Generate image based on humorous text
-            imageUrl = await generateImageWithAI(humorousText, context);
+            try {
+                context.log('Attempting to generate humor with Azure OpenAI...');
+                humorousText = await generateHumorWithAI(userText, context);
+                context.log('Humor generated successfully with AI');
+                usedAI = true;
+                
+                // Generate image based on humorous text
+                context.log('Attempting to generate image with DALL-E...');
+                imageUrl = await generateImageWithAI(humorousText, context);
+                context.log('Image generated with AI');
+            } catch (error) {
+                context.log('AI generation failed, using fallback:', error.message);
+                humorousText = generateMockHumor(userText);
+                imageUrl = generatePlaceholderImage(humorousText);
+                usedAI = false;
+            }
         } else {
             // Use mock responses (fallback for testing)
+            context.log('AI not configured, using mock responses');
+            context.log('To enable AI: Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_KEY in Azure Function App Settings');
             humorousText = generateMockHumor(userText);
             // Use placeholder image
             imageUrl = generatePlaceholderImage(humorousText);
@@ -89,6 +111,7 @@ module.exports = async function (context, req) {
                 originalText: userText,
                 humorousText: humorousText,
                 imageUrl: imageUrl,
+                usedAI: usedAI,
                 timestamp: new Date().toISOString()
             }
         };
@@ -130,6 +153,12 @@ Rules:
     const userPrompt = `Reinterpret this text in a hilarious way: "${text}"`;
 
     try {
+        context.log('Calling Azure OpenAI:', `${endpoint}/openai/deployments/${deploymentName}/...`);
+        
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const response = await fetch(`${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-15-preview`, {
             method: 'POST',
             headers: {
@@ -144,20 +173,30 @@ Rules:
                 max_tokens: 200,
                 temperature: 0.9,
                 top_p: 0.95
-            })
+            }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
-            throw new Error(`Azure OpenAI API error: ${response.status}`);
+            const errorText = await response.text();
+            context.log('Azure OpenAI error response:', errorText);
+            throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        context.log('Azure OpenAI response received successfully');
         return data.choices[0].message.content.trim();
 
     } catch (error) {
-        context.log('Azure OpenAI error:', error);
+        context.log('Azure OpenAI error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+        });
         // Fallback to mock humor if AI fails
-        return generateMockHumor(text);
+        throw error; // Re-throw to be handled by main try-catch
     }
 }
 
@@ -190,6 +229,12 @@ async function generateImageWithAI(humorText, context) {
     const imagePrompt = `Create a humorous, cartoon-style illustration representing this concept: ${humorText.substring(0, 200)}. Style: colorful, playful, funny, suitable for all ages.`;
 
     try {
+        context.log('Calling DALL-E 3 for image generation...');
+        
+        // Create abort controller for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for image generation
+        
         const response = await fetch(`${endpoint}/openai/deployments/dall-e-3/images/generations?api-version=2024-02-01`, {
             method: 'POST',
             headers: {
@@ -202,19 +247,29 @@ async function generateImageWithAI(humorText, context) {
                 size: '1024x1024',
                 quality: 'standard',
                 style: 'vivid'
-            })
+            }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
-            throw new Error(`DALL-E API error: ${response.status}`);
+            const errorText = await response.text();
+            context.log('DALL-E error response:', errorText);
+            throw new Error(`DALL-E API error: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        context.log('DALL-E image generated successfully:', data.data[0].url);
         return data.data[0].url;
 
     } catch (error) {
-        context.log('DALL-E error:', error);
+        context.log('DALL-E error details:', {
+            message: error.message,
+            name: error.name
+        });
         // Fallback to placeholder if AI image generation fails
+        context.log('Falling back to placeholder image');
         return generatePlaceholderImage(humorText);
     }
 }

@@ -860,10 +860,14 @@
                 const data = await result.json();
                 
                 console.log('📦 Full API response:', data);
+                console.log('🤖 Used AI:', data.usedAI);
 
                 if (data.success && data.humorousText) {
-                    // Show response text
-                    document.getElementById('responseText').textContent = data.humorousText;
+                    // Show response text with AI indicator
+                    const aiIndicator = data.usedAI ? ' 🤖' : ' 🎭';
+                    const modeText = data.usedAI ? ' (AI-powered)' : ' (Demo mode)';
+                    document.getElementById('responseText').textContent = data.humorousText + aiIndicator;
+                    console.log('Mode:', data.usedAI ? 'AI-powered' : 'Demo mode with placeholders');
                     
                     // Show image if available
                     const imageContainer = document.getElementById('responseImage');
