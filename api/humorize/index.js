@@ -91,6 +91,12 @@ module.exports = async function (context, req) {
                 humorousText = generateMockHumor(userText);
                 imageUrl = generatePlaceholderImage(humorousText);
                 usedAI = false;
+                
+                // Store error for debugging
+                this.lastError = {
+                    message: error.message,
+                    name: error.name
+                };
             }
         } else {
             // Use mock responses (fallback for testing)
@@ -115,9 +121,15 @@ module.exports = async function (context, req) {
                 success: true,
                 originalText: userText,
                 humorousText: humorousText,
-                imageUrl: imageUrl,
+                imageUrl: imageUrl,,
+                    lastError: this.lastError || null
                 usedAI: usedAI,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                debug: {
+                    endpoint: process.env.AZURE_OPENAI_ENDPOINT ? 'set' : 'not set',
+                    key: process.env.AZURE_OPENAI_KEY ? 'set' : 'not set',
+                    deployment: process.env.AZURE_OPENAI_DEPLOYMENT || 'not set'
+                }
             }
         };
 
