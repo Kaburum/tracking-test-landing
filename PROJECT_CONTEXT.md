@@ -4,8 +4,8 @@
 
 **Project Name**: Tracking Test Landing Page  
 **GitHub Repository**: https://github.com/Kaburum/tracking-test-landing  
-**Purpose**: A simple HTML landing page with backend API designed for testing JavaScript tracking implementations and AI-powered humor generation  
-**Status**: Deployed to Azure Static Web Apps. All features operational.
+**Purpose**: A modern web app with AI-powered humor generation, image creation, and comprehensive tracking/analytics features  
+**Status**: ✅ Deployed to Azure Static Web Apps. All features operational with cookie consent management.
 
 ## Project Structure
 
@@ -58,36 +58,49 @@ tracking-test-landing/
 ## Current Features
 
 ### Frontend (`index.html`)
-1. **Modern Landing Page Design**
+1. **Page Layout & Design**
+   - Clean title: "Welcome to the Best Website Ever"
    - Gradient purple background
-   - Responsive grid layout
-   - Interactive "Get Started" button
-   - Three feature cards
+   - Responsive, mobile-friendly design
+   - Simplified single-column layout
    - Tracking status indicator (bottom right)
 
-2. **Tracking Integration**
-   - Automatic page view tracking on load
-   - Button click tracking
-   - API health check on page load
-   - Console logging for debugging
-   - Visual feedback for API status
+2. **AI Humor Generator** (Primary Feature - Top of Page)
+   - Text input area (up to 1000 characters)
+   - AI-powered humorous text reinterpretation
+   - **AI-generated images** using DALL-E 3 or fun cartoon avatars
+   - 10 playful avatar styles (robots, characters, emoji-based)
+   - One-click generation and regeneration
+   - Loading animations and error handling
+   - Image error handling with automatic fallbacks
+   - Tracks humor generation events via UET
 
-3. **Bing UET Tracking** 🆕
+3. **Cookie Consent Banner** 🆕
+   - Fixed bottom banner with slide-up animation
+   - GDPR-compliant consent management
+   - Accept/Decline options
+   - Stores consent in localStorage
+   - Controls UET tracking based on consent
+   - UET consent state integration (`consent.grant`/`consent.deny`)
+   - Responsive mobile/desktop design
+
+4. **Bing UET Tracking with Consent**
    - Universal Event Tracking (UET) integration
+   - Consent-aware tracking (only fires if accepted)
+   - pageLoad event fires automatically on consent
    - Real-time UET events display section
    - Custom event tracking on user interactions
    - Visual status indicators (initializing/ready/error)
    - Event history with timestamps and details
+   - Consent events tracked and displayed
 
-4. **AI Humor Generator** 🆕
-   - Text input area (up to 1000 characters)
-   - AI-powered humorous text reinterpretation
-   - One-click generation and regeneration
-   - Loading animations and error handling
-   - Uses Azure OpenAI or mock responses
-   - Tracks humor generation events via UET
+5. **Tracking Integration**
+   - Automatic page view tracking
+   - API health check on page load
+   - Console logging for debugging
+   - Visual feedback for API status
 
-5. **Smart API Configuration**
+6. **Smart API Configuration**
    - Detects local development (localhost/127.0.0.1)
    - Uses `http://localhost:7071/api` for local
    - Uses `/api` for production (Azure Static Web Apps)
@@ -134,7 +147,7 @@ tracking-test-landing/
   ```
 
 **3. POST /api/humorize** 🆕
-- **Purpose**: Generate humorous reinterpretation of user text
+- **Purpose**: Generate humorous reinterpretation with AI-generated image
 - **Request Body**:
   ```json
   {
@@ -147,15 +160,19 @@ tracking-test-landing/
     "success": true,
     "originalText": "I love my job",
     "humorousText": "Ah yes, 'I love my job'...",
+    "imageUrl": "https://api.dicebear.com/7.x/bottts/svg?seed=...",
     "timestamp": "2025-12-22T12:00:00.000Z"
   }
   ```
 - **Features**:
-  - Azure OpenAI integration (GPT-3.5/4)
-  - Fallback to mock humorous responses
-  - 3-5 sentence responses
+  - **Text Generation**: Azure OpenAI (GPT-3.5/4) or mock responses
+  - **Image Generation**: DALL-E 3 (AI mode) or DiceBear avatars (mock mode)
+  - 10 fun avatar styles: bottts, avataaars, big-ears, croodles, fun-emoji, lorelei, micah, miniavs, notionists, personas
+  - Colorful, unique images for each generation
+  - 3-5 sentence humorous responses
   - Light, friendly, ironic tone
   - Input validation (max 1000 characters)
+  - Automatic fallbacks if image generation fails
   - CORS enabled
 
 **Old Entry: GET /api/health**
@@ -311,6 +328,13 @@ python -m http.server 8000
 
 7. **Bing UET Tag ID**: Currently configured with tag ID `97220626`. Update in index.html for your own tracking.
 
+8. **Cookie Consent & Privacy**:
+   - Cookie banner shown on first visit
+   - Consent stored in localStorage
+   - UET only loads after user consent
+   - Consent state synced with UET tracking
+   - Compliant with privacy regulations
+
 8. **Free Tier Limits**: Azure Static Web Apps free tier includes:
    - 100 GB bandwidth/month
    - 2 custom domains
@@ -321,7 +345,7 @@ python -m http.server 8000
 
 - **Current Branch**: main
 - **Remote Origin**: https://github.com/Kaburum/tracking-test-landing.git
-- **Last Commit**: "Add AI Humor Generator feature with Azure Functions backend"
+- **Last Commit**: "Add cookie consent banner with UET consent management"
 - **Files Tracked**: 15+ files
   - Frontend: index.html
   - Documentation: README.md, PROJECT_CONTEXT.md, API.md
@@ -343,17 +367,25 @@ Use this context to understand the current state of the project. The codebase is
 **Current Status**: ✅ **DEPLOYED & OPERATIONAL**
 - Azure Static Web App configured and running
 - All API endpoints functional (track, health, humorize)
-- Bing UET tracking active
-- AI Humor Generator operational (mock mode by default)
+- Bing UET tracking active with cookie consent
+- AI Humor Generator with image generation operational
+- Cookie consent banner managing privacy compliance
 - GitHub Actions CI/CD pipeline active
 
 **Optional Configuration**:
-- Add Azure OpenAI credentials to enable AI-powered humor generation
+- Add Azure OpenAI credentials to enable AI-powered humor + DALL-E 3 images
 - Customize UET tag ID for your own Bing Ads account
 - Add persistent storage for tracking events
+- Customize cookie consent text/styling
 
 **Recent Changes** (Dec 22, 2025):
 1. Fixed Azure Functions compatibility (v4 → v3 model)
 2. Added Bing UET tracking with real-time event display
 3. Implemented AI Humor Generator with dual-mode operation
-4. Updated all documentation (README, API.md, PROJECT_CONTEXT.md)
+4. **Added AI-powered image generation** (DALL-E 3 + fun avatars)
+5. **Implemented cookie consent banner** with UET consent management
+6. Simplified page layout (removed feature cards, moved humor to top)
+7. Enhanced placeholder images with 10 playful cartoon styles
+8. Added fun title "Welcome to the Best Website Ever"
+9. Integrated UET consent state management (grant/deny)
+10. Updated all documentation (README, API.md, PROJECT_CONTEXT.md)
