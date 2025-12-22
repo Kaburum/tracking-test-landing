@@ -4,8 +4,8 @@
 
 **Project Name**: Tracking Test Landing Page  
 **GitHub Repository**: https://github.com/Kaburum/tracking-test-landing  
-**Purpose**: A simple HTML landing page with backend API designed for testing JavaScript tracking implementations  
-**Status**: Codebase complete and pushed to GitHub. Azure Static Web App deployment in progress.
+**Purpose**: A simple HTML landing page with backend API designed for testing JavaScript tracking implementations and AI-powered humor generation  
+**Status**: Deployed to Azure Static Web Apps. All features operational.
 
 ## Project Structure
 
@@ -22,9 +22,12 @@ tracking-test-landing/
     ├── track/              # Track events endpoint
     │   ├── function.json   # Function configuration
     │   └── index.js        # POST /api/track implementation
-    └── health/             # Health check endpoint
+    ├── health/             # Health check endpoint
+    │   ├── function.json   # Function configuration
+    │   └── index.js        # GET /api/health implementation
+    └── humorize/           # AI humor generator endpoint
         ├── function.json   # Function configuration
-        └── index.js        # GET /api/health implementation
+        └── index.js        # POST /api/humorize implementation
 ```
 
 ## Technology Stack
@@ -36,10 +39,16 @@ tracking-test-landing/
 - Automatic API URL detection (local vs production)
 
 ### Backend
-- **Azure Functions** (Node.js v4 programming model)
+- **Azure Functions** (Node.js v3 programming model)
 - Serverless architecture
 - RESTful API endpoints
 - CORS enabled for cross-origin requests
+- Azure OpenAI integration (optional)
+
+### Tracking & Analytics
+- **Bing UET (Universal Event Tracking)** integration
+- Real-time event monitoring
+- Custom event tracking
 
 ### Deployment
 - **GitHub**: Version control (Kaburum/tracking-test-landing)
@@ -63,7 +72,22 @@ tracking-test-landing/
    - Console logging for debugging
    - Visual feedback for API status
 
-3. **Smart API Configuration**
+3. **Bing UET Tracking** 🆕
+   - Universal Event Tracking (UET) integration
+   - Real-time UET events display section
+   - Custom event tracking on user interactions
+   - Visual status indicators (initializing/ready/error)
+   - Event history with timestamps and details
+
+4. **AI Humor Generator** 🆕
+   - Text input area (up to 1000 characters)
+   - AI-powered humorous text reinterpretation
+   - One-click generation and regeneration
+   - Loading animations and error handling
+   - Uses Azure OpenAI or mock responses
+   - Tracks humor generation events via UET
+
+5. **Smart API Configuration**
    - Detects local development (localhost/127.0.0.1)
    - Uses `http://localhost:7071/api` for local
    - Uses `/api` for production (Azure Static Web Apps)
@@ -109,6 +133,43 @@ tracking-test-landing/
   }
   ```
 
+**3. POST /api/humorize** 🆕
+- **Purpose**: Generate humorous reinterpretation of user text
+- **Request Body**:
+  ```json
+  {
+    "text": "string"  // Required: User text (max 1000 chars)
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "originalText": "I love my job",
+    "humorousText": "Ah yes, 'I love my job'...",
+    "timestamp": "2025-12-22T12:00:00.000Z"
+  }
+  ```
+- **Features**:
+  - Azure OpenAI integration (GPT-3.5/4)
+  - Fallback to mock humorous responses
+  - 3-5 sentence responses
+  - Light, friendly, ironic tone
+  - Input validation (max 1000 characters)
+  - CORS enabled
+
+**Old Entry: GET /api/health**
+- **Purpose**: Check API health status
+- **Response**:
+  ```json
+  {
+    "status": "healthy",
+    "timestamp": "2025-12-22T12:00:00.000Z",
+    "version": "1.0.0",
+    "service": "tracking-api"
+  }
+  ```
+
 ## Key Implementation Details
 
 ### API Event Flow
@@ -136,11 +197,12 @@ tracking-test-landing/
 ✅ GitHub repository created (Kaburum/tracking-test-landing)  
 ✅ All code committed and pushed to main branch  
 ✅ GitHub Desktop configured  
-✅ Repository migrated to new GitHub account
-
-### In Progress
-🔄 Azure Static Web App resource being created  
-🔄 GitHub connection being authorized  
+✅ Repository migrated to new GitHub account  
+✅ Azure Static Web App deployed  
+✅ Azure Functions v3 model implemented  
+✅ Bing UET tracking integrated  
+✅ AI Humor Generator feature added  
+✅ GitHub Actions CI/CD configured  
 
 ### Required Configuration
 When creating Azure Static Web App:
@@ -180,21 +242,23 @@ When creating Azure Static Web App:
 - [ ] Test `/api/track` with custom events
 - [ ] Verify CORS works from different domains
 
-## Future Enhancements (Not Yet Implemented)
+## Future Enhancements
 
 ### High Priority
-- Add persistent storage (Azure Table Storage or Cosmos DB)
+- Add persistent storage (Azure Table Storage or Cosmos DB) for tracking events
 - Implement authentication (API keys or Azure AD)
-- Add rate limiting to prevent abuse
-- Input validation and sanitization
-- Error handling improvements
+- Add rate limiting to prevent abuse on AI endpoint
+- Enhanced input sanitization for AI prompts
+- Cost monitoring for Azure OpenAI usage
 
 ### Medium Priority
 - Analytics dashboard to view tracked events
 - Multiple pages for navigation tracking tests
 - Form submission tracking examples
-- User session tracking
-- Custom event parameters
+- User session tracking with cookies
+- AI humor customization (tone, length, style)
+- Export/download humor results
+- Share generated humor on social media
 
 ### Low Priority
 - Custom domain setup
@@ -202,6 +266,8 @@ When creating Azure Static Web App:
 - Automated testing (unit + integration)
 - Performance monitoring
 - A/B testing capabilities
+- Multi-language humor support
+- Humor favorites/bookmarking
 
 ## Development Environment
 
@@ -228,15 +294,24 @@ python -m http.server 8000
 
 ## Important Notes
 
-1. **API Location Critical**: The `api` folder location setting in Azure Static Web Apps must be set to `api` (not `/api` or `./api`) for the backend to work.
+1. **Azure Functions v3 Model**: Uses v3 programming model (module.exports) for Azure Static Web Apps compatibility. Extension bundle set to `[3.*, 4.0.0)`.
 
-2. **CORS Configuration**: Currently allows all origins (`*`). Restrict in production.
+2. **API Location Critical**: The `api` folder location setting in Azure Static Web Apps must be set to `api` (not `/api` or `./api`) for the backend to work.
 
-3. **In-Memory Storage**: Current implementation stores events in memory. They will be lost when Azure Functions scale to zero or restart. Add persistent storage for production use.
+3. **CORS Configuration**: Currently allows all origins (`*`). Restrict in production.
 
-4. **No Database**: No database connection configured yet. Events are not persisted.
+4. **In-Memory Storage**: Current implementation stores events in memory. They will be lost when Azure Functions scale to zero or restart. Add persistent storage for production use.
 
-5. **Free Tier Limits**: Azure Static Web Apps free tier includes:
+5. **No Database**: No database connection configured yet. Events are not persisted.
+
+6. **AI Humor Generator Modes**:
+   - **AI Mode**: Requires Azure OpenAI configuration (endpoint, key, deployment)
+   - **Mock Mode**: Uses pre-written templates when AI is not configured
+   - Automatically falls back to mock if AI fails
+
+7. **Bing UET Tag ID**: Currently configured with tag ID `97220626`. Update in index.html for your own tracking.
+
+8. **Free Tier Limits**: Azure Static Web Apps free tier includes:
    - 100 GB bandwidth/month
    - 2 custom domains
    - Unlimited API calls
@@ -246,8 +321,12 @@ python -m http.server 8000
 
 - **Current Branch**: main
 - **Remote Origin**: https://github.com/Kaburum/tracking-test-landing.git
-- **Last Commit**: "Add backend API with Azure Functions"
-- **Files Tracked**: 9 files (7 API files, 2 frontend files)
+- **Last Commit**: "Add AI Humor Generator feature with Azure Functions backend"
+- **Files Tracked**: 15+ files
+  - Frontend: index.html
+  - Documentation: README.md, PROJECT_CONTEXT.md, API.md
+  - API Functions: track, health, humorize
+  - Configuration: host.json, function.json files
 
 ## Contact & Resources
 
@@ -259,6 +338,22 @@ python -m http.server 8000
 
 ## For Next Iteration
 
-Use this context to understand the current state of the project. The codebase is complete and functional. The main task remaining is to complete the Azure Static Web App deployment and verify everything works in production.
+Use this context to understand the current state of the project. The codebase is complete and functional with all features deployed and operational.
 
-**Current Status**: Awaiting Azure Static Web App configuration completion. All code is ready and pushed to GitHub.
+**Current Status**: ✅ **DEPLOYED & OPERATIONAL**
+- Azure Static Web App configured and running
+- All API endpoints functional (track, health, humorize)
+- Bing UET tracking active
+- AI Humor Generator operational (mock mode by default)
+- GitHub Actions CI/CD pipeline active
+
+**Optional Configuration**:
+- Add Azure OpenAI credentials to enable AI-powered humor generation
+- Customize UET tag ID for your own Bing Ads account
+- Add persistent storage for tracking events
+
+**Recent Changes** (Dec 22, 2025):
+1. Fixed Azure Functions compatibility (v4 → v3 model)
+2. Added Bing UET tracking with real-time event display
+3. Implemented AI Humor Generator with dual-mode operation
+4. Updated all documentation (README, API.md, PROJECT_CONTEXT.md)
