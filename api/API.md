@@ -210,4 +210,110 @@ async function checkHealth() {
   const health = await response.json();
   console.log('API Status:', health.status);
 }
+
+// Generate humorous text
+async function generateHumor(text) {
+  const response = await fetch('/api/humorize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  const result = await response.json();
+  console.log('Humorous text:', result.humorousText);
+}
 ```
+
+---
+
+## AI Humor Generator Endpoint
+
+### Generate Humorous Text
+
+Transform any user input into a hilarious reinterpretation using AI.
+
+**Endpoint**: `POST /api/humorize`
+
+**Request Headers**:
+```
+Content-Type: application/json
+```
+
+**Request Body**:
+```json
+{
+  "text": "string"     // Required: User text to reinterpret (max 1000 characters)
+}
+```
+
+**Example Request**:
+```javascript
+fetch('/api/humorize', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    text: 'I love my job'
+  })
+});
+```
+
+**Response** (Success):
+```json
+{
+  "success": true,
+  "originalText": "I love my job",
+  "humorousText": "Ah yes, 'I love my job' - The eternal battle cry of someone who's about to learn a valuable life lesson the hard way.",
+  "timestamp": "2025-12-22T12:00:00.000Z"
+}
+```
+
+**Response** (Error - No Text):
+```json
+{
+  "success": false,
+  "error": "Text is required"
+}
+```
+
+**Response** (Error - Text Too Long):
+```json
+{
+  "success": false,
+  "error": "Text is too long. Please keep it under 1000 characters."
+}
+```
+
+**Status Codes**:
+- `200`: Success - Humor generated
+- `400`: Bad Request - Missing or invalid text
+- `500`: Server Error - Failed to generate humor
+
+**Features**:
+- **AI-Powered**: Uses Azure OpenAI (GPT-3.5/4) when configured
+- **Fallback Mode**: Uses pre-written humorous templates if AI is unavailable
+- **Character Limit**: 1000 characters max (1-2 paragraphs)
+- **Response Length**: 3-5 sentences
+- **Tone**: Light, friendly, ironic - no offensive content
+- **CORS**: Enabled for all origins
+
+**Configuration** (Optional - for AI mode):
+
+Set these environment variables in Azure Static Web Apps settings:
+- `AZURE_OPENAI_ENDPOINT`: Your Azure OpenAI endpoint URL
+- `AZURE_OPENAI_KEY`: Your Azure OpenAI API key
+- `AZURE_OPENAI_DEPLOYMENT`: Deployment name (default: "gpt-35-turbo")
+
+If not configured, the endpoint will use mock humorous responses.
+
+**System Prompt** (AI Mode):
+```
+You are a witty, sarcastic AI comedian. Your job is to take any text the user 
+provides and reinterpret it in a hilarious, ironic, or absurdly humorous way.
+
+Rules:
+- Keep responses to 3-5 sentences maximum
+- Be light-hearted and friendly, never offensive or mean-spirited
+- Use humor techniques like: exaggeration, irony, unexpected twists, or playful sarcasm
+- Make it genuinely funny and creative
+- Avoid sensitive topics, politics, or controversial content

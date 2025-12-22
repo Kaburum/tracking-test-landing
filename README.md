@@ -1,9 +1,10 @@
 # Tracking Test Landing Page
 
-A simple HTML landing page with backend API designed for testing JavaScript tracking implementations.
+A simple HTML landing page with backend API designed for testing JavaScript tracking implementations and AI-powered text humor generation.
 
 ## Features
 
+### Core Features
 - Clean, modern design with gradient background
 - Responsive layout that works on all devices
 - Interactive button for testing click tracking
@@ -11,6 +12,19 @@ A simple HTML landing page with backend API designed for testing JavaScript trac
 - Real-time tracking with API integration
 - Console logging for debugging tracking events
 - Health check endpoint for API monitoring
+
+### New: AI Humor Generator 😂
+- Enter any text and get a hilarious AI-powered reinterpretation
+- Uses Azure OpenAI (GPT-3.5/4) or mock responses
+- 3-5 sentence humorous responses
+- One-click regeneration
+- Light, friendly, and ironic tone
+
+### Bing UET Tracking
+- Bing Universal Event Tracking (UET) integration
+- Real-time UET events display
+- Custom event tracking on user interactions
+- Visual status indicators
 
 ## Getting Started
 

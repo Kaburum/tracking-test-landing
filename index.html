@@ -185,6 +185,152 @@
             padding: 30px;
             font-style: italic;
         }
+
+        /* AI Humor Section */
+        .humor-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #fff5f5;
+            border-radius: 15px;
+            border: 2px solid #ff6b6b;
+        }
+
+        .humor-section h2 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .humor-section p.subtitle {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .humor-input-area {
+            margin-bottom: 20px;
+        }
+
+        .humor-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .humor-textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .humor-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .humor-button {
+            padding: 12px 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .humor-button:hover:not(:disabled) {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .humor-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .humor-button.secondary {
+            background: #6c757d;
+        }
+
+        .humor-button.secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+
+        .humor-response {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+            text-align: left;
+            display: none;
+        }
+
+        .humor-response.visible {
+            display: block;
+        }
+
+        .humor-response .response-label {
+            font-weight: 600;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .humor-response .response-text {
+            color: #333;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .humor-loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .humor-loading.visible {
+            display: block;
+        }
+
+        .humor-loading .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .humor-error {
+            padding: 15px;
+            background: #ffe6e6;
+            border-radius: 8px;
+            color: #d32f2f;
+            display: none;
+            margin-top: 15px;
+        }
+
+        .humor-error.visible {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -217,6 +363,40 @@
             </div>
             <div class="events-container" id="eventsContainer">
                 <div class="no-events">No UET events captured yet. Events will appear here as they are tracked.</div>
+            </div>
+        </div>
+
+        <!-- AI Humor Section -->
+        <div class="humor-section">
+            <h2>😂 AI Humor Generator</h2>
+            <p class="subtitle">Enter any text and get a hilarious AI-powered reinterpretation!</p>
+            
+            <div class="humor-input-area">
+                <textarea 
+                    class="humor-textarea" 
+                    id="humorInput" 
+                    placeholder="Type something here... anything! (e.g., 'I love my job', 'The weather is nice today', 'I'm learning JavaScript')"></textarea>
+            </div>
+
+            <div class="humor-buttons">
+                <button class="humor-button" id="generateBtn" onclick="generateHumor()">
+                    ✨ Generate Humor
+                </button>
+                <button class="humor-button secondary" id="regenerateBtn" onclick="regenerateHumor()" style="display: none;">
+                    🔄 Regenerate
+                </button>
+            </div>
+
+            <div class="humor-loading" id="humorLoading">
+                <div class="spinner"></div>
+                <p>AI is cooking up something funny...</p>
+            </div>
+
+            <div class="humor-error" id="humorError"></div>
+
+            <div class="humor-response" id="humorResponse">
+                <div class="response-label">AI Says:</div>
+                <div class="response-text" id="responseText"></div>
             </div>
         </div>
     </div>
@@ -431,6 +611,85 @@
                 document.getElementById('uetStatus').classList.add('error');
             }
         }, 5000);
+
+        // AI Humor Generator Functions
+        let lastUserInput = '';
+
+        async function generateHumor() {
+            const input = document.getElementById('humorInput').value.trim();
+            const loading = document.getElementById('humorLoading');
+            const response = document.getElementById('humorResponse');
+            const error = document.getElementById('humorError');
+            const generateBtn = document.getElementById('generateBtn');
+            const regenerateBtn = document.getElementById('regenerateBtn');
+
+            // Reset displays
+            response.classList.remove('visible');
+            error.classList.remove('visible');
+
+            // Validate input
+            if (!input) {
+                error.textContent = 'Please enter some text first!';
+                error.classList.add('visible');
+                return;
+            }
+
+            // Save input for regeneration
+            lastUserInput = input;
+
+            // Show loading
+            loading.classList.add('visible');
+            generateBtn.disabled = true;
+            regenerateBtn.style.display = 'none';
+
+            try {
+                // Call AI API
+                const result = await fetch(`${API_BASE_URL}/humorize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: input })
+                });
+
+                const data = await result.json();
+
+                if (data.success && data.humorousText) {
+                    // Show response
+                    document.getElementById('responseText').textContent = data.humorousText;
+                    response.classList.add('visible');
+                    regenerateBtn.style.display = 'inline-block';
+
+                    // Track UET event
+                    trackUETEvent('humor_generated', 'engagement', 'AI Humor Generator', 1);
+                    
+                    console.log('😂 Humor generated:', data.humorousText);
+                } else {
+                    throw new Error(data.error || 'Failed to generate humor');
+                }
+            } catch (err) {
+                console.error('Error generating humor:', err);
+                error.textContent = err.message || 'Failed to generate humor. Please try again.';
+                error.classList.add('visible');
+            } finally {
+                loading.classList.remove('visible');
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function regenerateHumor() {
+            if (lastUserInput) {
+                await generateHumor();
+            }
+        }
+
+        // Allow Enter key to submit (with Shift+Enter for new line)
+        document.getElementById('humorInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateHumor();
+            }
+        });
     </script>
 </body>
 </html>
