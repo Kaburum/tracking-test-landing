@@ -74,7 +74,8 @@ module.exports = async function (context, req) {
             imageUrl = generatePlaceholderImage(humorousText);
         }
 
-        context.log('Humorous text and image generated');
+        context.log('Humorous text generated:', humorousText.substring(0, 50));
+        context.log('Image URL generated:', imageUrl);
 
         // Return success response
         context.res = {
@@ -220,11 +221,25 @@ async function generateImageWithAI(humorText, context) {
 
 // Generate placeholder image URL (fallback)
 function generatePlaceholderImage(humorText) {
-    // Use a fun placeholder service with text overlay
-    const encodedText = encodeURIComponent('😂 AI Humor');
-    const colors = ['FF6B6B', 'FFA07A', '98D8C8', 'F7DC6F', 'BB8FCE', '85C1E2'];
+    // Use multiple reliable placeholder services
+    const colors = ['ff6b6b', 'ffa07a', '98d8c8', 'f7dc6f', 'bb8fce', '85c1e2', 'ff9ff3', 'feca57'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     
-    // Using placeholder.com with custom text and color
-    return `https://via.placeholder.com/1024x1024/${randomColor}/FFFFFF?text=${encodedText}`;
+    // Try multiple placeholder services (in order of preference)
+    const services = [
+        // DiceBear - generates fun avatars
+        `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(humorText.substring(0, 20))}&backgroundColor=${randomColor}`,
+        
+        // Placeholder.com - simple colored blocks
+        `https://via.placeholder.com/1024x1024/${randomColor}/ffffff?text=😂+AI+Humor`,
+        
+        // Placehold.co - modern placeholder service
+        `https://placehold.co/1024x1024/${randomColor}/white?text=AI+Generated+Humor`,
+        
+        // UI Avatars - text-based avatars
+        `https://ui-avatars.com/api/?name=AI+Humor&size=1024&background=${randomColor}&color=fff&bold=true&font-size=0.33`
+    ];
+    
+    // Return the first service (most reliable)
+    return services[0];
 }

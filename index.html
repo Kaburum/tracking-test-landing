@@ -681,6 +681,8 @@
                 });
 
                 const data = await result.json();
+                
+                console.log('📦 Full API response:', data);
 
                 if (data.success && data.humorousText) {
                     // Show response text
@@ -691,10 +693,24 @@
                     const imageElement = document.getElementById('generatedImage');
                     
                     if (data.imageUrl) {
+                        console.log('🖼️ Setting image URL:', data.imageUrl);
+                        
+                        // Add error handling for image load
+                        imageElement.onerror = function() {
+                            console.error('❌ Image failed to load:', data.imageUrl);
+                            // Try fallback image
+                            imageElement.src = 'https://ui-avatars.com/api/?name=AI+Humor&size=1024&background=ff6b6b&color=fff&bold=true&font-size=0.33';
+                        };
+                        
+                        imageElement.onload = function() {
+                            console.log('✅ Image loaded successfully');
+                        };
+                        
                         imageElement.src = data.imageUrl;
                         imageElement.alt = 'AI-generated illustration for: ' + data.humorousText.substring(0, 50);
                         imageContainer.style.display = 'block';
                     } else {
+                        console.warn('⚠️ No image URL in response');
                         imageContainer.style.display = 'none';
                     }
                     
@@ -705,9 +721,6 @@
                     trackUETEvent('humor_generated', 'engagement', 'AI Humor Generator', 1);
                     
                     console.log('😂 Humor generated:', data.humorousText);
-                    if (data.imageUrl) {
-                        console.log('🖼️ Image generated:', data.imageUrl);
-                    }
                 } else {
                     throw new Error(data.error || 'Failed to generate humor');
                 }
