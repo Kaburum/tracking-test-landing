@@ -863,40 +863,33 @@
                 console.log('🤖 Used AI:', data.usedAI);
 
                 if (data.success && data.humorousText) {
-                    // Show response text with AI indicator
+                    // Show response text immediately with AI indicator
                     const aiIndicator = data.usedAI ? ' 🤖' : ' 🎭';
-                    const modeText = data.usedAI ? ' (AI-powered)' : ' (Demo mode)';
                     document.getElementById('responseText').textContent = data.humorousText + aiIndicator;
                     console.log('Mode:', data.usedAI ? 'AI-powered' : 'Demo mode with placeholders');
                     
-                    // Show image if available
-                    const imageContainer = document.getElementById('responseImage');
-                    const imageElement = document.getElementById('generatedImage');
-                    
-                    if (data.imageUrl) {
-                        console.log('🖼️ Setting image URL:', data.imageUrl);
-                        
-                        // Add error handling for image load
-                        imageElement.onerror = function() {
-                            console.error('❌ Image failed to load:', data.imageUrl);
-                            // Try fallback image
-                            imageElement.src = 'https://ui-avatars.com/api/?name=AI+Humor&size=1024&background=ff6b6b&color=fff&bold=true&font-size=0.33';
-                        };
-                        
-                        imageElement.onload = function() {
-                            console.log('✅ Image loaded successfully');
-                        };
-                        
-                        imageElement.src = data.imageUrl;
-                        imageElement.alt = 'AI-generated illustration for: ' + data.humorousText.substring(0, 50);
-                        imageContainer.style.display = 'block';
-                    } else {
-                        console.warn('⚠️ No image URL in response');
-                        imageContainer.style.display = 'none';
-                    }
-                    
                     response.classList.add('visible');
                     regenerateBtn.style.display = 'inline-block';
+                    
+                    // Show image container with loading indicator
+                    const imageContainer = document.getElementById('responseImage');
+                    const imageElement = document.getElementById('generatedImage');
+                    imageContainer.style.display = 'block';
+                    imageElement.style.display = 'none';
+                    
+                    // Show loading spinner for image
+                    let imageLoadingDiv = document.getElementById('imageLoading');
+                    if (!imageLoadingDiv) {
+                        imageLoadingDiv = document.createElement('div');
+                        imageLoadingDiv.id = 'imageLoading';
+                        imageLoadingDiv.style.cssText = 'text-align: center; padding: 20px; color: #666;';
+                        imageLoadingDiv.innerHTML = '<div class="spinner"></div><p style="margin-top: 10px;">Generating image...</p>';
+                        imageContainer.insertBefore(imageLoadingDiv, imageElement);
+                    }
+                    imageLoadingDiv.style.display = 'block';
+                    
+                    // Generate image separately
+                    generateImage(data.humorousText);
 
                     // Track UET event
                     trackUETEvent('humor_generated', 'engagement', 'AI Humor Generator', 1);
@@ -912,6 +905,51 @@
             } finally {
                 loading.classList.remove('visible');
                 generateBtn.disabled = false;
+            }
+        }
+
+        // Generate image separately
+        async function generateImage(humorText) {
+            const imageContainer = document.getElementById('responseImage');
+            const imageElement = document.getElementById('generatedImage');
+            const imageLoadingDiv = document.getElementById('imageLoading');
+            
+            try {
+                console.log('🖼️ Generating image...');
+                // Call image generation API
+                const result = await fetch(`${API_BASE_URL}/generate-image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: humorText })
+                });
+
+                const data = await result.json();
+                console.log('🖼️ Image response:', data);
+
+                if (data.success && data.imageUrl) {
+                    imageElement.onerror = function() {
+                        console.error('❌ Image failed to load:', data.imageUrl);
+                        imageElement.src = 'https://ui-avatars.com/api/?name=AI+Humor&size=1024&background=ff6b6b&color=fff&bold=true&font-size=0.33';
+                    };
+                    
+                    imageElement.onload = function() {
+                        console.log('✅ Image loaded successfully');
+                        if (imageLoadingDiv) imageLoadingDiv.style.display = 'none';
+                        imageElement.style.display = 'block';
+                    };
+                    
+                    imageElement.src = data.imageUrl;
+                    imageElement.alt = 'AI-generated illustration';
+                } else {
+                    throw new Error('Failed to generate image');
+                }
+            } catch (err) {
+                console.error('Error generating image:', err);
+                if (imageLoadingDiv) {
+                    imageLoadingDiv.innerHTML = '<p style="color: #ff6b6b;">⚠️ Image generation failed</p>';
+                }
             }
         }
 
