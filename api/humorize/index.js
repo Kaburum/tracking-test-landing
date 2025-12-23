@@ -189,9 +189,8 @@ Rules:
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
-                ],
-                max_completion_tokens: 200
-                // Note: gpt-5-nano only supports default temperature (1) and top_p values
+                ]
+                // Using default parameters for gpt-5-nano
             }),
             signal: controller.signal
         });
