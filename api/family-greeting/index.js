@@ -125,7 +125,7 @@ module.exports = async function (context, req) {
 async function generateWithAI(wish, member, context) {
     const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
     const apiKey = process.env.AZURE_OPENAI_KEY;
-    const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-5-nano';
+    const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4.1';
 
     const systemPrompt = `Ты веселый рассказчик семейных историй! Создаешь смешные новогодние истории и шутки про членов семьи.
 
@@ -175,7 +175,9 @@ ${member.description}
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
-                ]
+                ],
+                max_tokens: 800,
+                temperature: 0.8
             }),
             signal: controller.signal
         });
