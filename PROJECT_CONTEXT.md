@@ -11,11 +11,12 @@
 
 ```
 tracking-test-landing/
-├── index.html              # Main landing page with tracking integration
+├── index.html              # Main landing page with AI humor generator
+├── kids.html               # 🆕 Family New Year greetings page (Russian)
 ├── README.md               # Project documentation
 ├── .gitignore              # Git ignore rules
 ├── PROJECT_CONTEXT.md      # This file
-└── api/                    # Backend API (Azure Functions)
+└── api/                    # Backend API (Azure Functions v3)
     ├── host.json           # Azure Functions configuration
     ├── package.json        # Node.js dependencies
     ├── API.md              # API documentation
@@ -25,9 +26,18 @@ tracking-test-landing/
     ├── health/             # Health check endpoint
     │   ├── function.json   # Function configuration
     │   └── index.js        # GET /api/health implementation
-    └── humorize/           # AI humor generator endpoint
+    ├── humorize/           # AI humor generator endpoint
+    │   ├── function.json   # Function configuration
+    │   └── index.js        # POST /api/humorize (gpt-5-nano)
+    ├── family-greeting/    # 🆕 Family greetings generator
+    │   ├── function.json   # Function configuration
+    │   └── index.js        # POST /api/family-greeting (gpt-4.1)
+    ├── generate-image/     # 🆕 Separate image generation endpoint
+    │   ├── function.json   # Function configuration
+    │   └── index.js        # POST /api/generate-image (DALL-E 3)
+    └── config-check/       # 🆕 Environment variable diagnostics
         ├── function.json   # Function configuration
-        └── index.js        # POST /api/humorize implementation
+        └── index.js        # GET /api/config-check
 ```
 
 ## Technology Stack
@@ -43,7 +53,10 @@ tracking-test-landing/
 - Serverless architecture
 - RESTful API endpoints
 - CORS enabled for cross-origin requests
-- Azure OpenAI integration (optional)
+- **Azure OpenAI integration**: 
+  - gpt-5-nano for main humor generator
+  - gpt-4.1 for family greetings (more creative)
+  - DALL-E 3 for AI-generated images
 
 ### Tracking & Analytics
 - **Bing UET (Universal Event Tracking)** integration
@@ -67,7 +80,9 @@ tracking-test-landing/
 
 2. **AI Humor Generator** (Primary Feature - Top of Page)
    - Text input area (up to 1000 characters)
-   - AI-powered humorous text reinterpretation
+   - AI-powered humorous text reinterpretation (gpt-5-nano)
+   - **Two-step generation**: Text loads first, image follows
+   - Separate image generation endpoint for better UX
    - **AI-generated images** using DALL-E 3 or fun cartoon avatars
    - 10 playful avatar styles (robots, characters, emoji-based)
    - One-click generation and regeneration
@@ -75,7 +90,24 @@ tracking-test-landing/
    - Image error handling with automatic fallbacks
    - Tracks humor generation events via UET
 
-3. **Cookie Consent Banner** 🆕
+3. **Family New Year Greetings Page** (`/kids.html`) 🆕
+   - Russian-language interface for family use
+   - Personalized greetings for 5 family members:
+     - Тая (13) - танцы, акробатика, шоколад, сноуборд, Stranger Things
+     - Сева (11) - KFC, игры, кикбоксинг, гитара, горные лыжи, Stranger Things
+     - Зоя (9) - гимнастика, барабаны, рисование, горные лыжи, Stranger Things
+     - Арина (мама) - учеба, бег, уборка, велосипед, горные лыжи, Stranger Things
+     - Женя (папа) - Microsoft PM, спорт, гаджеты, велосипед, сноуборд, Stranger Things
+   - Default input: "В следующем году я хочу " (pre-filled)
+   - Random family member selection for each greeting
+   - AI generates 400-500 character funny stories (gpt-4.1)
+   - Stories show HOW person will achieve their wish (personalized humor)
+   - Two-step generation: text first, then DALL-E 3 image
+   - Highly detailed personal descriptions for AI context
+   - Mock fallback when AI unavailable
+   - Not linked from main page (direct URL access only)
+
+4. **Cookie Consent Banner**
    - Fixed bottom banner with slide-up animation
    - GDPR-compliant consent management
    - Accept/Decline options
@@ -84,7 +116,7 @@ tracking-test-landing/
    - UET consent state integration (`consent.grant`/`consent.deny`)
    - Responsive mobile/desktop design
 
-4. **Bing UET Tracking with Consent**
+5. **Bing UET Tracking with Consent**
    - Universal Event Tracking (UET) integration
    - Consent-aware tracking (only fires if accepted)
    - pageLoad event fires automatically on consent
@@ -94,13 +126,13 @@ tracking-test-landing/
    - Event history with timestamps and details
    - Consent events tracked and displayed
 
-5. **Tracking Integration**
+6. **Tracking Integration**
    - Automatic page view tracking
    - API health check on page load
    - Console logging for debugging
    - Visual feedback for API status
 
-6. **Smart API Configuration**
+7. **Smart API Configuration**
    - Detects local development (localhost/127.0.0.1)
    - Uses `http://localhost:7071/api` for local
    - Uses `/api` for production (Azure Static Web Apps)
@@ -146,8 +178,9 @@ tracking-test-landing/
   }
   ```
 
-**3. POST /api/humorize** 🆕
+**3. POST /api/humorize**
 - **Purpose**: Generate humorous reinterpretation with AI-generated image
+- **AI Model**: gpt-5-nano (basic, fast responses)
 - **Request Body**:
   ```json
   {
@@ -160,19 +193,87 @@ tracking-test-landing/
     "success": true,
     "originalText": "I love my job",
     "humorousText": "Ah yes, 'I love my job'...",
-    "imageUrl": "https://api.dicebear.com/7.x/bottts/svg?seed=...",
     "timestamp": "2025-12-22T12:00:00.000Z"
   }
   ```
 - **Features**:
-  - **Text Generation**: Azure OpenAI (GPT-3.5/4) or mock responses
-  - **Image Generation**: DALL-E 3 (AI mode) or DiceBear avatars (mock mode)
-  - 10 fun avatar styles: bottts, avataaars, big-ears, croodles, fun-emoji, lorelei, micah, miniavs, notionists, personas
-  - Colorful, unique images for each generation
+  - **Text Generation**: Azure OpenAI (gpt-5-nano) or mock responses
   - 3-5 sentence humorous responses
   - Light, friendly, ironic tone
   - Input validation (max 1000 characters)
-  - Automatic fallbacks if image generation fails
+  - CORS enabled
+  - No image generation (now handled by separate endpoint)
+
+**4. POST /api/generate-image** 🆕
+- **Purpose**: Generate AI images separately from text (two-step generation)
+- **Request Body**:
+  ```json
+  {
+    "text": "string"  // Greeting text to visualize
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/...",
+    "usedAI": true,
+    "timestamp": "2025-12-23T10:00:00.000Z"
+  }
+  ```
+- **Features**:
+  - **Image Generation**: DALL-E 3 (AI mode) or DiceBear avatars (fallback)
+  - 60-second timeout for DALL-E requests
+  - Automatic fallback to placeholder on failure
+  - 10 fun avatar styles: bottts, avataaars, big-ears, croodles, fun-emoji, lorelei, micah, miniavs, notionists, personas
+  - Colorful, unique images for each generation
+  - CORS enabled
+  - Better UX: Text shows immediately, image loads after
+
+**5. POST /api/family-greeting** 🆕
+- **Purpose**: Generate personalized funny New Year stories for family members
+- **AI Model**: gpt-4.1 (more creative, better quality than gpt-5-nano)
+- **Request Body**:
+  ```json
+  {
+    "wish": "string"  // Required: User wish starting with "В следующем году я хочу"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "greeting": "Смешная история про члена семьи...",
+    "familyMember": "Тая",
+    "usedAI": true,
+    "timestamp": "2025-12-23T10:00:00.000Z"
+  }
+  ```
+- **Features**:
+  - Random selection from 5 family members
+  - Highly detailed personal descriptions (hobbies, habits, quirks)
+  - Generates 400-500 character funny stories
+  - Stories show HOW person will achieve their goal (personalized humor)
+  - Uses gpt-4.1 with max_tokens: 800, temperature: 0.8
+  - Mock fallback when AI unavailable
+  - Russian language only
+  - CORS enabled
+
+**6. GET /api/config-check** 🆕
+- **Purpose**: Diagnostic endpoint to verify environment variables
+- **Response**:
+  ```json
+  {
+    "endpoint": "configured: https://ai-for-landing.openai.azure.com",
+    "key": "configured: sk-...abc123",
+    "deployment": "gpt-5-nano",
+    "timestamp": "2025-12-23T10:00:00.000Z"
+  }
+  ```
+- **Features**:
+  - Shows which Azure OpenAI variables are set
+  - Previews first/last characters of sensitive values
+  - Helps debug AI integration issues
   - CORS enabled
 
 **Old Entry: GET /api/health**
@@ -378,7 +479,7 @@ Use this context to understand the current state of the project. The codebase is
 - Add persistent storage for tracking events
 - Customize cookie consent text/styling
 
-**Recent Changes** (Dec 22, 2025):
+**Recent Changes** (Dec 23, 2025):
 1. Fixed Azure Functions compatibility (v4 → v3 model)
 2. Added Bing UET tracking with real-time event display
 3. Implemented AI Humor Generator with dual-mode operation
@@ -388,4 +489,23 @@ Use this context to understand the current state of the project. The codebase is
 7. Enhanced placeholder images with 10 playful cartoon styles
 8. Added fun title "Welcome to the Best Website Ever"
 9. Integrated UET consent state management (grant/deny)
-10. Updated all documentation (README, API.md, PROJECT_CONTEXT.md)
+10. **Created family New Year greetings page** (`/kids.html`) in Russian
+11. **Implemented two-step generation** (text first, then image separately)
+12. **Switched to gpt-4.1** for family greetings (better creativity)
+13. Added extensive family member descriptions (hobbies, habits, quirks)
+14. Configured separate DALL-E 3 image generation endpoint
+15. Updated default input to "В следующем году я хочу " for kids page
+16. Enhanced AI prompts for story-based output (400-500 chars)
+17. Removed family greetings link from main page (direct access only)
+18. Added diagnostic config-check endpoint for troubleshooting
+
+### Azure OpenAI Configuration
+**Required Environment Variables** (set in Azure Static Web Apps):
+- `AZURE_OPENAI_ENDPOINT`: https://ai-for-landing.openai.azure.com
+- `AZURE_OPENAI_KEY`: Your Azure OpenAI API key
+- `AZURE_OPENAI_DEPLOYMENT`: gpt-4.1 (or gpt-5-nano for main page)
+
+**Deployed Models**:
+- **gpt-5-nano**: Fast, basic responses for main humor generator
+- **gpt-4.1**: Creative, detailed stories for family greetings
+- **dall-e-3**: AI image generation (optional, falls back to avatars)
