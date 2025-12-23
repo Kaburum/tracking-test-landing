@@ -190,9 +190,8 @@ Rules:
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                max_completion_tokens: 200,
-                temperature: 0.9,
-                top_p: 0.95
+                max_completion_tokens: 200
+                // Note: gpt-5-nano only supports default temperature (1) and top_p values
             }),
             signal: controller.signal
         });
