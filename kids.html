@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новогодние Поздравления для Семьи</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        #generateBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #generateBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        #generateBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #regenerateBtn {
+            background: #f093fb;
+            color: white;
+            display: none;
+        }
+
+        #regenerateBtn:hover {
+            background: #e06ff0;
+            transform: translateY(-2px);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #loading, #error {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #loading.visible, #error.visible {
+            display: block;
+        }
+
+        #error {
+            color: #e74c3c;
+            background: #ffe6e6;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        #response {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        #response.visible {
+            display: block;
+        }
+
+        #familyMember {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        #responseText {
+            font-size: 1.1em;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        #responseImage {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #generatedImage {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .home-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .home-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .home-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎄 Новогодние Поздравления 🎅</h1>
+        <p class="subtitle">Сгенерируй смешное поздравление для члена семьи</p>
+
+        <div class="input-section">
+            <label for="wishInput">Введите ваше пожелание (начните с "Я желаю..."):</label>
+            <textarea id="wishInput" placeholder="Я желаю тебе..."></textarea>
+        </div>
+
+        <div class="button-container">
+            <button id="generateBtn" onclick="generateGreeting()">🎁 Создать Поздравление</button>
+            <button id="regenerateBtn" onclick="regenerateGreeting()">🔄 Еще Раз</button>
+        </div>
+
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Генерирую поздравление...</p>
+        </div>
+
+        <div id="error"></div>
+
+        <div id="response">
+            <div id="familyMember"></div>
+            <div id="responseText"></div>
+            <div id="responseImage"></div>
+        </div>
+
+        <div class="home-link">
+            <a href="/">← Вернуться на главную</a>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:7071/api'
+            : '/api';
+
+        let lastUserInput = '';
+
+        async function generateGreeting() {
+            const input = document.getElementById('wishInput').value.trim();
+            const loading = document.getElementById('loading');
+            const response = document.getElementById('response');
+            const error = document.getElementById('error');
+            const generateBtn = document.getElementById('generateBtn');
+            const regenerateBtn = document.getElementById('regenerateBtn');
+
+            // Reset displays
+            response.classList.remove('visible');
+            error.classList.remove('visible');
+
+            // Validate input
+            if (!input) {
+                error.textContent = 'Пожалуйста, введите ваше пожелание!';
+                error.classList.add('visible');
+                return;
+            }
+
+            if (!input.toLowerCase().startsWith('я желаю')) {
+                error.textContent = 'Пожелание должно начинаться с "Я желаю..."';
+                error.classList.add('visible');
+                return;
+            }
+
+            // Save input
+            lastUserInput = input;
+
+            // Show loading
+            loading.classList.add('visible');
+            generateBtn.disabled = true;
+            regenerateBtn.style.display = 'none';
+
+            try {
+                console.log('🎄 Generating family greeting...');
+                
+                // Call API
+                const result = await fetch(`${API_BASE_URL}/family-greeting`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ wish: input })
+                });
+
+                const data = await result.json();
+                console.log('📦 API response:', data);
+
+                if (data.success && data.greeting) {
+                    // Show family member and greeting
+                    document.getElementById('familyMember').textContent = `🎁 Для: ${data.familyMember}`;
+                    document.getElementById('responseText').textContent = data.greeting;
+                    
+                    response.classList.add('visible');
+                    regenerateBtn.style.display = 'inline-block';
+                    
+                    // Show image container with loading
+                    const imageContainer = document.getElementById('responseImage');
+                    imageContainer.innerHTML = '<div class="spinner"></div><p style="margin-top: 10px;">Генерирую картинку...</p>';
+                    
+                    // Generate image separately
+                    generateImage(data.greeting);
+                    
+                    console.log('✅ Greeting generated');
+                } else {
+                    throw new Error(data.error || 'Не удалось создать поздравление');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                error.textContent = err.message || 'Произошла ошибка. Попробуйте еще раз.';
+                error.classList.add('visible');
+            } finally {
+                loading.classList.remove('visible');
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function generateImage(greetingText) {
+            const imageContainer = document.getElementById('responseImage');
+            
+            try {
+                console.log('🖼️ Generating image...');
+                
+                const result = await fetch(`${API_BASE_URL}/generate-image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text: greetingText })
+                });
+
+                const data = await result.json();
+                console.log('🖼️ Image response:', data);
+
+                if (data.success && data.imageUrl) {
+                    const img = document.createElement('img');
+                    img.id = 'generatedImage';
+                    img.src = data.imageUrl;
+                    img.alt = 'Новогодняя картинка';
+                    
+                    img.onload = function() {
+                        console.log('✅ Image loaded');
+                        imageContainer.innerHTML = '';
+                        imageContainer.appendChild(img);
+                    };
+                    
+                    img.onerror = function() {
+                        console.error('❌ Image failed to load');
+                        imageContainer.innerHTML = '<p style="color: #ffe6e6;">⚠️ Не удалось загрузить картинку</p>';
+                    };
+                } else {
+                    throw new Error('Failed to generate image');
+                }
+            } catch (err) {
+                console.error('Error generating image:', err);
+                imageContainer.innerHTML = '<p style="color: #ffe6e6;">⚠️ Не удалось создать картинку</p>';
+            }
+        }
+
+        async function regenerateGreeting() {
+            if (lastUserInput) {
+                await generateGreeting();
+            }
+        }
+
+        // Allow Enter key
+        document.getElementById('wishInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateGreeting();
+            }
+        });
+    </script>
+</body>
+</html>
