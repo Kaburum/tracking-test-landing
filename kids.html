@@ -207,8 +207,8 @@
         <p class="subtitle">Сгенерируй смешное поздравление для члена семьи</p>
 
         <div class="input-section">
-            <label for="wishInput">Введите ваше пожелание (начните с "Я желаю..."):</label>
-            <textarea id="wishInput" placeholder="тебе счастья, здоровья, успехов...">Я желаю </textarea>
+            <label for="wishInput">Что ты хочешь в следующем году?</label>
+            <textarea id="wishInput" placeholder="побольше приключений, стать лучше в математике, съездить в интересное место...">В следующем году я хочу </textarea>
         </div>
 
         <div class="button-container">
@@ -260,8 +260,8 @@
                 return;
             }
 
-            if (!input.toLowerCase().startsWith('я желаю')) {
-                error.textContent = 'Пожелание должно начинаться с "Я желаю..."';
+            if (!input.toLowerCase().startsWith('в следующем году я хочу')) {
+                error.textContent = 'Начни фразу с "В следующем году я хочу..."';
                 error.classList.add('visible');
                 return;
             }
