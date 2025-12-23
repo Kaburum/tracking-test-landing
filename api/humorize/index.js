@@ -206,7 +206,20 @@ Rules:
 
         const data = await response.json();
         context.log('Azure OpenAI response received successfully');
-        return data.choices[0].message.content.trim();
+        context.log('Response structure:', JSON.stringify(data, null, 2));
+        
+        // Handle different response structures
+        const content = data.choices?.[0]?.message?.content || 
+                       data.choices?.[0]?.text ||
+                       data.content ||
+                       '';
+        
+        if (!content) {
+            context.log('Warning: No content in response. Full response:', data);
+            throw new Error('Empty response from Azure OpenAI');
+        }
+        
+        return content.trim();
 
     } catch (error) {
         context.log('Azure OpenAI error details:', {
