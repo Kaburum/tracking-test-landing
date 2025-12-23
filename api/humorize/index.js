@@ -216,7 +216,8 @@ Rules:
         
         if (!content) {
             context.log('Warning: No content in response. Full response:', data);
-            throw new Error('Empty response from Azure OpenAI');
+            // Include response structure in error for debugging
+            throw new Error(`Empty response from Azure OpenAI. Response keys: ${Object.keys(data).join(', ')}. Choices: ${JSON.stringify(data.choices)}`);
         }
         
         return content.trim();
