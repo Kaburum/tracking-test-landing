@@ -190,7 +190,7 @@ Rules:
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                max_tokens: 200,
+                max_completion_tokens: 200,
                 temperature: 0.9,
                 top_p: 0.95
             }),
